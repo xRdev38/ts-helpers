@@ -1,0 +1,1 @@
+module.exports = require("@xrdev_38/prettier-config");
