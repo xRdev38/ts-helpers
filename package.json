@@ -12,6 +12,9 @@
     "postinstall": "pnpm run prepare"
   },
   "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "jest": "^29.7.0"
   },
