@@ -3,130 +3,111 @@ name: CI, Publish & Docs
 on:
   push:
     branches:
-      - main      # CI + publish packages
-      - develop   # CI + deploy docs
+      - main
+      - develop
   pull_request:
     branches:
       - main
       - develop
 
 env:
-  NODE_VERSION: '18.x'
-  PNPM_VERSION: '8'
-  NPM_REGISTRY: 'https://registry.npmjs.org'
+  NODE_VERSION: '20.x'
+  PNPM_VERSION: '9.6.0'
 
 jobs:
-  # 1) Setup & Install
-  install:
-    name: Install Dependencies
+  ci:
+    name: CI (Lint, Test, Build)
     runs-on: ubuntu-latest
-    outputs:
-      cache-hit: ${{ steps.cache.outputs.cache-hit }}
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-          registry-url: ${{ env.NPM_REGISTRY }}
+          registry-url: 'https://registry.npmjs.org'
 
-      - name: Install pnpm
-        run: npm install -g pnpm@${{ env.PNPM_VERSION }}
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
 
-      - name: Create .npmrc for private registry
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+      - name: Debug – List files in workspace
+        run: ls -al
 
-      - name: Install workspace
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-  # 2) Lint
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    needs: install
-    steps:
-      - uses: actions/checkout@v4
-      - run: pnpm exec lerna run lint
+      - name: Lint
+        run: pnpm exec lerna run lint
 
-  # 3) Test
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    needs: install
-    steps:
-      - uses: actions/checkout@v4
-      - run: pnpm exec lerna run test
+      - name: Test
+        run: pnpm exec lerna run test
 
-  # 4) Build
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    needs: install
-    steps:
-      - uses: actions/checkout@v4
-      - run: pnpm exec lerna run build
+      - name: Build
+        run: pnpm exec lerna run build
 
-  # 5) Publish packages (main only)
   publish:
-    name: Publish Packages to NPM
-    if: github.ref == 'refs/heads/main'
+    name: Publish Packages
     runs-on: ubuntu-latest
-    needs: [build, test, lint]
+    needs: ci
+    if: github.ref == 'refs/heads/main'
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-          registry-url: ${{ env.NPM_REGISTRY }}
+          registry-url: 'https://registry.npmjs.org'
 
-      - name: Install pnpm & dependencies
-        run: |
-          npm install -g pnpm@${{ env.PNPM_VERSION }}
-          pnpm install --frozen-lockfile
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
 
-      - name: Re-create .npmrc
+      - name: Create .npmrc
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
-      - name: Bump version (CI mode)
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Version CI
         run: pnpm run version:ci
 
-      - name: Publish from-package
+      - name: Publish CI
         run: pnpm run publish:ci
 
-  # 6) Deploy docs to gh-pages (develop only)
   docs:
     name: Deploy Documentation
-    if: github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
-    needs: build
+    needs: ci
+    if: github.ref == 'refs/heads/develop'
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
 
-      - name: Install pnpm & dependencies
-        run: |
-          npm install -g pnpm@${{ env.PNPM_VERSION }}
-          pnpm install --frozen-lockfile
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
 
-      - name: Build docs package
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build docs
         run: pnpm exec lerna run --scope=@xrdev_38/ts-service-docs build
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy docs to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
-          github_token: ${{ secrets.GIT_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: ./dist/packages/docs
+          publish_dir: ./dist/packages/ts-service-docs
