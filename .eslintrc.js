@@ -1,0 +1,20 @@
+module.exports = {
+  parser: '@typescript-eslint/parser',
+  extends: '@xrdev_38/eslint-config',
+  ignorePatterns: ['**/*.spec.ts', '**/jest.config.ts'],
+  rules: {
+    'import/prefer-default-export': 'off',
+    'no-underscore-dangle': 'off',
+    'no-unused-vars': 'off',
+    'no-param-reassign': 'off',
+    'no-restricted-syntax': 'off',
+    'func-names': 'off',
+    'no-undef': 'off',
+    'unicorn/no-array-reduce': 'off',
+    'unicorn/prefer-array-flat': 'off',
+    'unicorn/no-null': 'off',
+    'class-methods-use-this': 'off',
+    'import/no-unresolved': 'off',
+    'import/extensions': 'off',
+  },
+};

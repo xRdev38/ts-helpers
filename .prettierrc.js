@@ -1,1 +1,1 @@
-module.exports = require("@xrdev_38/prettier-config");
+module.exports = '@xrdev_38/prettier-config';

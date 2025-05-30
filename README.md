@@ -1,90 +1,118 @@
-# TsHelpers
+# ts-helpers Monorepo
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+> Monorepo root for `ts-helpers` suite of TypeScript helper libraries.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+This repository uses Lerna and pnpm workspaces to manage multiple publishable and buildable packages.
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/js?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+---
 
-## Finish your CI setup
+## Table of Contents
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/FZqqlBbA5v)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Workspaces](#workspaces)
+- [Available Scripts](#available-scripts)
+- [Packages Structure](#packages-structure)
+- [Publishing & Registry](#publishing--registry)
+- [Contributing](#contributing)
+- [License](#license)
 
+---
 
-## Generate a library
+## Prerequisites
 
-```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
+- **Node.js** v18.x or higher
+- **pnpm** v8 or higher
+- **Git** for version control
+
+---
+
+## Installation
+
+Clone the repository and install dependencies:
+
+```bash
+git clone <repository-url>
+cd ts-helpers-monorepo
+pnpm install --frozen-lockfile
 ```
 
-## Run tasks
+After install, Husky hooks are set up automatically (`prepare` & `postinstall` scripts).
 
-To build the library use:
+---
 
-```sh
-npx nx build pkg1
+## Workspaces
+
+This monorepo uses pnpm workspaces defined under:
+
+```json
+"workspaces": [
+  "packages/*"
+]
 ```
 
-To run any task with Nx use:
+Each package resides in `packages/<scope>/<pkg>` and is managed by Lerna.
 
-```sh
-npx nx <target> <project-name>
+---
+
+## Available Scripts
+
+All commands are run from the root using `pnpm run <script>`.
+
+| Script                 | Description                                                                                  |
+|------------------------|----------------------------------------------------------------------------------------------|
+| `pnpm run lint`        | Run ESLint on all packages                                                                   |
+| `pnpm run test`        | Run unit tests in all packages                                                               |
+| `pnpm run test:coverage` | Run tests with coverage reports                                                            |
+| `pnpm run build`       | Build all packages using Lerna                                                               |
+| `pnpm run commit`      | Launch Commitizen for conventional commits                                                   |
+| `pnpm run version`     | Generate changelog and commit it (`CHANGELOG.md`)                                            |
+| `pnpm run version:prerelease` | Bump pre-release version, e.g. `beta` tag                                              |
+| `pnpm run version:ci`  | Bump version in CI mode with conventional commits                                            |
+| `pnpm run bootstrap:ci` | Install dependencies in CI (`pnpm install --immutable`)                                     |
+| `pnpm run ci`          | Run `lint`, `test`, and `build` in parallel                                                   |
+| `pnpm run publish:ci`  | Publish all packages from local versions to registry                                         |
+| `pnpm run deploy:doc`  | Build docs and deploy to Surge (legacy)                                                      |
+| `pnpm run prepare`     | Initialize Husky Git hooks                                                                    |
+| `pnpm run postinstall` | Trigger `prepare` after install                                                               |
+
+---
+
+## Packages Structure
+
+```text
+packages/
+├── @xRdev38/utils         # General utility helpers
+├── @xRdev38/api-client    # HTTP client wrapper
+├── @xRdev38/guards        # Type guards & validation
+├── @xRdev38/types         # Shared TypeScript types & interfaces
+└── @xRdev38/di            # Inversify DI container & services
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+Each package is buildable and publishable independently via Lerna.
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+---
 
-## Versioning and releasing
+Ensure you have an environment variable `NPM_TOKEN` set in CI for authentication:
 
-To version and release the library use
-
-```
-npx nx release
+```bash
+export NPM_TOKEN=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
-Pass `--dry-run` to see what would happen without actually releasing the library.
+In GitHub Actions, this token is saved as a secret and used to generate `.npmrc`.
 
-[Learn more about Nx release &raquo;](hhttps://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+---
 
-## Keep TypeScript project references up to date
+## Contributing
 
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/awesome`
+3. Commit your changes: `pnpm run commit`
+4. Push to the branch: `git push origin feature/awesome`
+5. Open a Pull Request
 
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
+---
 
-```sh
-npx nx sync
-```
+## License
 
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
-
-```sh
-npx nx sync:check
-```
-
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
-
-
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/nx-api/js?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+This project does not specify a license in `package.json`. Please add a `LICENSE` file or update the root `package.json` accordingly.
