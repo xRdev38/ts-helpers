@@ -2,5 +2,21 @@
   "extends": "./tsconfig.base.json",
   "compileOnSave": false,
   "files": [],
-  "references": []
+  "references": [
+    {
+      "path": "./packages/utils"
+    },
+    {
+      "path": "./packages/api-client"
+    },
+    {
+      "path": "./packages/guards"
+    },
+    {
+      "path": "./packages/types"
+    },
+    {
+      "path": "./packages/di"
+    }
+  ]
 }
